@@ -23,11 +23,21 @@ export function PublicNavbar({ onNavigate }) {
   const { isMobile } = useResponsive();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
+  
+  // 1. Tambahkan state settings
+  const [settings, setSettings] = useState({ site_title: 'UD Putra Mandiri', site_subtitle: 'Oleh-Oleh Khas Siak', site_logo: '' });
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // 2. Tambahkan useEffect untuk fetch data dari Supabase
+  useEffect(() => {
+    supabase.from('settings').select('*').single().then(({ data }) => {
+      if (data) setSettings(data);
+    });
   }, []);
 
   const navLinks = ['Beranda', 'Tentang Kami', 'Kontak'];
@@ -43,10 +53,20 @@ export function PublicNavbar({ onNavigate }) {
       display: 'flex', justifyContent: 'space-between', alignItems: 'center'
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', zIndex: 1001 }} onClick={() => { onNavigate('home'); setMobileMenu(false); }}>
-        <div style={{ width: isMobile ? '36px' : '40px', height: isMobile ? '36px' : '40px', borderRadius: '50%', background: '#361C14', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: isMobile ? '14px' : '16px', flexShrink: 0 }}>PM</div>
+        
+        {/* 3. Render gambar jika logo ada, jika tidak, kembali ke bulatan teks seperti aslinya */}
+        {settings.site_logo ? (
+          <img src={settings.site_logo} alt="Logo" style={{ width: isMobile ? '36px' : '40px', height: isMobile ? '36px' : '40px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+        ) : (
+          <div style={{ width: isMobile ? '36px' : '40px', height: isMobile ? '36px' : '40px', borderRadius: '50%', background: '#361C14', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: isMobile ? '14px' : '16px', flexShrink: 0 }}>
+            {settings.site_title ? settings.site_title.charAt(0) : 'P'}
+          </div>
+        )}
+        
         <div>
-          <h1 style={{ margin: 0, fontSize: isMobile ? '16px' : '18px', color: '#361C14', fontWeight: '800', whiteSpace: 'nowrap' }}>UD Putra Mandiri</h1>
-          <span style={{ fontSize: '11px', color: '#A0AEC0', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>Oleh-Oleh Khas Siak</span>
+          {/* 4. Teks juga dibuat dinamis mengikuti pengaturan database */}
+          <h1 style={{ margin: 0, fontSize: isMobile ? '16px' : '18px', color: '#361C14', fontWeight: '800', whiteSpace: 'nowrap' }}>{settings.site_title}</h1>
+          <span style={{ fontSize: '11px', color: '#A0AEC0', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>{settings.site_subtitle}</span>
         </div>
       </div>
 
@@ -95,21 +115,49 @@ export function Home() {
   return (
     <div style={{ background: '#FBF9F6', minHeight: '100vh', overflowX: 'hidden' }}>
       
-      {/* HERO SECTION */}
+      {/* HERO SECTION - SVG BACKGROUND & GLASSMORPHISM */}
       <div style={{ 
-        position: 'relative', width: '100%', minHeight: isMobile ? '85vh' : '90vh',
-        paddingTop: isMobile ? '120px' : '160px', paddingBottom: isMobile ? '100px' : '160px',
-        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        background: 'linear-gradient(135deg, #2A0808 0%, #4A1515 50%, #681E1E 100%)', overflow: 'hidden'
+        position: 'relative',
+        width: '100%',
+        minHeight: isMobile ? '85vh' : '90vh',
+        paddingTop: isMobile ? '120px' : '160px',
+        paddingBottom: isMobile ? '100px' : '160px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        
+        // Panggil SVG dari folder public
+        backgroundColor: '#4A1515', // Warna dasar cadangan
+        backgroundImage: 'url(/istana-siak.jpeg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center bottom', // Fokuskan gambar istana di tengah bawah
+        backgroundAttachment: 'fixed', // Efek parallax saat discroll
+        overflow: 'hidden'
       }}>
         
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'radial-gradient(rgba(212, 175, 55, 0.15) 2px, transparent 2px)', backgroundSize: '40px 40px', opacity: 0.5, zIndex: 1 }}></div>
-        <div style={{ position: 'absolute', width: '100%', height: '100%', background: 'radial-gradient(circle at 50% 40%, rgba(212,175,55,0.25) 0%, transparent 60%)', zIndex: 1 }}></div>
+        {/* OVERLAY GRADASI (Wajib agar teks kontras dan menyatu dengan tema web) */}
+        <div style={{ 
+          position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, 
+          background: 'linear-gradient(135deg, rgba(42,8,8,0.85) 0%, rgba(74,21,21,0.7) 50%, rgba(104,30,30,0.85) 100%)', 
+          zIndex: 1 
+        }}></div>
 
+        {/* Pendaran Cahaya Emas di Tengah (Opsional untuk kesan mewah) */}
+        <div style={{ 
+          position: 'absolute', width: '100%', height: '100%', 
+          background: 'radial-gradient(circle at 50% 40%, rgba(212,175,55,0.3) 0%, transparent 60%)', 
+          zIndex: 2 
+        }}></div>
+
+        {/* KONTEN TEKS & TOMBOL (Aman di tengah) */}
         <div style={{ position: 'relative', zIndex: 3, textAlign: 'center', maxWidth: '900px', padding: '0 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
           
-          <h4 style={{ color: '#D4AF37', letterSpacing: '3px', fontSize: isMobile ? '11px' : '13px', fontWeight: '800', marginBottom: '20px', textTransform: 'uppercase' }}>Katalog Resmi</h4>
-          
+          {/* Lencana (Badge) bergaya Glassmorphism */}
+          <div style={{ background: 'rgba(212, 175, 55, 0.15)', border: '1px solid rgba(212, 175, 55, 0.4)', padding: '8px 20px', borderRadius: '30px', marginBottom: '24px', backdropFilter: 'blur(8px)' }}>
+            <h4 style={{ color: '#F3E5AB', letterSpacing: '3px', fontSize: isMobile ? '10px' : '12px', fontWeight: '800', margin: 0, textTransform: 'uppercase' }}>Katalog Resmi</h4>
+          </div>
+
           <h1 style={{ fontFamily: 'Playfair Display, serif', color: '#FFFFFF', fontSize: isMobile ? '36px' : '64px', fontWeight: '800', lineHeight: '1.2', marginBottom: '24px', textShadow: '0 4px 20px rgba(0,0,0,0.6)' }}>
             Nikmati Kelezatan Dodol Buah Asli Khas Siak Sri Indrapura
           </h1>
@@ -117,55 +165,103 @@ export function Home() {
           <p style={{ fontSize: isMobile ? '15px' : '18px', lineHeight: '1.7', marginBottom: '40px', color: 'rgba(255, 255, 255, 0.9)', maxWidth: '750px', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
             Dibuat dengan resep tradisional warisan kuliner yang legit dan buah pilihan segar. Pantau ketersediaan varian produk kami secara real-time langsung dari gudang penyimpanan.
           </p>
+
+          <button onClick={() => window.scrollBy({ top: window.innerHeight * 0.7, behavior: 'smooth' })} style={{ background: 'linear-gradient(135deg, #D4AF37 0%, #AA8222 100%)', color: '#FFFFFF', border: 'none', padding: isMobile ? '14px 28px' : '18px 36px', borderRadius: '30px', fontSize: isMobile ? '14px' : '16px', fontWeight: '800', cursor: 'pointer', boxShadow: '0 10px 30px rgba(212, 175, 55, 0.4)', transition: 'transform 0.2s', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            Lihat Ketersediaan Stok
+          </button>
         </div>
 
-        {/* LENGKUNGAN OMBAK */}
-        <svg style={{ position: 'absolute', bottom: '-2px', left: 0, width: '100%', height: isMobile ? '60px' : '140px', zIndex: 2 }} preserveAspectRatio="none" viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg">
+        {/* LENGKUNGAN OMBAK (Transisi mulus ke bagian bawah) */}
+        <svg style={{ position: 'absolute', bottom: '-2px', left: 0, width: '100%', height: isMobile ? '60px' : '140px', zIndex: 3 }} preserveAspectRatio="none" viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg">
           <path d="M0,60 C320,120 420,0 720,0 C1020,0 1120,120 1440,60 L1440,120 L0,120 Z" fill="#FBF9F6" />
         </svg>
       </div>
 
-      {/* SECTION KETERSEDIAAN STOK (DESAIN PREMIUM BARU) */}
-      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: isMobile ? '40px 20px 80px' : '80px 20px 120px', position: 'relative', zIndex: 3 }}>
+      {/* SECTION KETERSEDIAAN STOK (ULTRA-MODERN REDESIGN) */}
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: isMobile ? '60px 20px 80px' : '100px 20px 120px', position: 'relative', zIndex: 4 }}>
         
-        <div style={{ marginBottom: '40px', textAlign: isMobile ? 'left' : 'center' }}>
-          <h2 style={{ fontFamily: 'Playfair Display, serif', color: '#361C14', fontSize: isMobile ? '28px' : '36px', fontWeight: '800', margin: '0 0 12px' }}>Ketersediaan Stok</h2>
-          <p style={{ color: '#718096', fontSize: '15px', margin: 0, fontWeight: '500' }}>Data terupdate secara otomatis dari setiap shift produksi karyawan.</p>
+        <div style={{ marginBottom: '50px', textAlign: 'center' }}>
+          <h4 style={{ color: '#D4AF37', letterSpacing: '2px', fontSize: '12px', fontWeight: '800', marginBottom: '12px', textTransform: 'uppercase' }}>Katalog Produk</h4>
+          <h2 style={{ fontFamily: 'Playfair Display, serif', color: '#361C14', fontSize: isMobile ? '32px' : '42px', fontWeight: '800', margin: '0 0 16px' }}>Ketersediaan Stok</h2>
+          <p style={{ color: '#718096', fontSize: '15px', margin: '0 auto', fontWeight: '500', maxWidth: '500px', lineHeight: '1.6' }}>
+            Data terupdate secara otomatis dari setiap shift produksi karyawan. Segera amankan pesanan Anda.
+          </p>
         </div>
         
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '24px' }}>
+        {/* CSS Grid yang 100% Responsif dan Dinamis */}
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(320px, 1fr))', gap: '32px' }}>
           {products.map((p, idx) => (
             <div key={idx} style={{ 
-              background: '#fff', borderRadius: '24px', padding: '20px', 
-              boxShadow: '0 10px 40px rgba(54, 28, 20, 0.05)', border: '1px solid rgba(237,242,247,0.8)', 
-              transition: 'all 0.3s ease', cursor: 'pointer',
-              display: 'flex', flexDirection: 'column'
+              background: '#ffffff', borderRadius: '24px', 
+              boxShadow: '0 10px 30px rgba(54, 28, 20, 0.05)', border: '1px solid rgba(237,242,247,0.8)', 
+              transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)', cursor: 'pointer', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' 
             }} 
-            onMouseOver={e => e.currentTarget.style.transform = 'translateY(-6px)'} 
-            onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}>
+            onMouseOver={e => {
+              e.currentTarget.style.transform = 'translateY(-12px)';
+              e.currentTarget.style.boxShadow = '0 24px 48px rgba(54, 28, 20, 0.12)';
+              e.currentTarget.querySelector('.img-zoom').style.transform = 'scale(1.08)';
+            }} 
+            onMouseOut={e => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 10px 30px rgba(54, 28, 20, 0.05)';
+              e.currentTarget.querySelector('.img-zoom').style.transform = 'scale(1)';
+            }}>
               
-              {/* Gambar Produk Real / Placeholder */}
-              <div style={{ background: '#FAF5F2', height: '180px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px', overflow: 'hidden' }}>
+              {/* AREA GAMBAR - Edge to Edge dengan Efek Zoom Halus */}
+              <div style={{ height: '240px', width: '100%', overflow: 'hidden', background: '#F8FAFC', position: 'relative' }}>
                 {p.image_url ? (
-                  <img src={p.image_url} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img className="img-zoom" src={p.image_url} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.6s ease' }} />
                 ) : (
-                  <ShoppingBag color="#B89B8E" size={60} strokeWidth={1.2} />
+                  <div className="img-zoom" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', transition: 'transform 0.6s ease' }}>
+                    <i className="fa-solid fa-box-open" style={{ color: '#CBD5E0', fontSize: '64px' }}></i>
+                  </div>
                 )}
+                
+                {/* Lencana Status Melayang (Glassmorphism ringan) */}
+                <div style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)', padding: '6px 14px', borderRadius: '20px', fontSize: '11px', fontWeight: '800', color: p.stock_ready > p.stock_minimum ? '#047857' : '#E53E3E', boxShadow: '0 4px 15px rgba(0,0,0,0.08)' }}>
+                  {p.stock_ready > p.stock_minimum ? 'Tersedia' : 'Stok Menipis'}
+                </div>
               </div>
               
-              <h3 style={{ margin: '0 0 16px', fontSize: '20px', color: '#361C14', fontWeight: '800', fontFamily: 'Playfair Display, serif', flexGrow: 1 }}>
-                {p.name}
-              </h3>
-              
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '16px', borderTop: '1px dashed #E2E8F0' }}>
-                <span style={{ color: '#718096', fontSize: '13px', fontWeight: '600' }}>Siap Kirim:</span>
-                <span style={{ 
-                  background: p.stock_ready > p.stock_minimum ? '#E6FFFA' : '#FFF5F5', 
-                  color: p.stock_ready > p.stock_minimum ? '#047857' : '#E53E3E', 
-                  padding: '6px 16px', borderRadius: '20px', fontWeight: '800', fontSize: '13px' 
-                }}>
-                  {p.stock_ready} Box
-                </span>
+              {/* AREA KONTEN BAWAH */}
+              <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+                
+                <h3 style={{ margin: '0 0 20px', fontSize: '22px', color: '#361C14', fontWeight: '800', fontFamily: 'Playfair Display, serif', flexGrow: 1, lineHeight: '1.3' }}>
+                  {p.name}
+                </h3>
+                
+                {/* Kotak Info Stok Modern */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', background: '#F8FAFC', padding: '14px 16px', borderRadius: '16px', border: '1px solid #EDF2F7' }}>
+                  <span style={{ color: '#64748B', fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Siap Kirim</span>
+                  <span style={{ color: p.stock_ready > p.stock_minimum ? '#059669' : '#E53E3E', fontWeight: '900', fontSize: '16px' }}>
+                    {p.stock_ready} <span style={{fontSize: '12px', fontWeight: '600', color: '#94A3B8'}}>Box</span>
+                  </span>
+                </div>
+
+                {/* Tombol Pesan Elegan (Menyatu dengan Tema Marun) */}
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(`https://wa.me/6281234567890?text=Halo%20Admin%20UD%20Putra%20Mandiri,%20saya%20tertarik%20memesan%20*${encodeURIComponent(p.name)}*.%20Apakah%20stoknya%20masih%20ada?`, '_blank');
+                  }}
+                  style={{ 
+                    width: '100%', background: 'linear-gradient(135deg, #681E1E 0%, #4A1515 100%)', color: '#fff', 
+                    border: 'none', padding: '14px', borderRadius: '16px', fontWeight: '800', 
+                    fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', 
+                    justifyContent: 'center', gap: '8px', boxShadow: '0 10px 25px rgba(104,30,30,0.2)', transition: 'all 0.3s' 
+                  }}
+                  onMouseOver={e => {
+                     e.currentTarget.style.transform = 'translateY(-2px)';
+                     e.currentTarget.style.boxShadow = '0 15px 30px rgba(104,30,30,0.3)';
+                  }}
+                  onMouseOut={e => {
+                     e.currentTarget.style.transform = 'translateY(0)';
+                     e.currentTarget.style.boxShadow = '0 10px 25px rgba(104,30,30,0.2)';
+                  }}
+                >
+                  <i className="fa-brands fa-whatsapp" style={{ fontSize: '18px' }}></i> Pesan Sekarang
+                </button>
+
               </div>
             </div>
           ))}
@@ -185,8 +281,24 @@ export function About() {
   return (
     <div style={{ background: '#FBF9F6', minHeight: '100vh', overflowX: 'hidden' }}>
       <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', maxWidth: '1100px', margin: '0 auto', gap: isMobile ? '32px' : '60px', alignItems: 'center', padding: isMobile ? '120px 20px 80px' : '160px 20px 80px' }}>
-        <div style={{ width: '100%', background: '#D1B89E', height: isMobile ? '280px' : '450px', borderRadius: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 20px 50px rgba(104,30,30,0.1)' }}><ShoppingBag color="#fff" size={isMobile ? 64 : 100} opacity={0.6} strokeWidth={1} /></div>
-        <div style={{ width: '100%' }}>
+        
+        {/* PERBAIKAN: Membungkus gambar dengan div dan flex: 1 agar proporsinya persis 50% */}
+        <div style={{ flex: 1, width: '100%' }}>
+          <img 
+            src="/istana-siak.jpeg" 
+            alt="Sejarah UD Putra Mandiri" 
+            style={{ 
+              width: '100%', 
+              height: isMobile ? '280px' : '450px', 
+              borderRadius: '30px', 
+              objectFit: 'cover', 
+              boxShadow: '0 20px 50px rgba(104,30,30,0.1)' 
+            }} 
+          />
+        </div>
+        
+        {/* PERBAIKAN: Menambahkan flex: 1 di container teks agar mengambil sisa 50% ruang */}
+        <div style={{ flex: 1, width: '100%' }}>
           <h4 style={{ color: '#D4AF37', letterSpacing: '2px', fontSize: '12px', fontWeight: '800', marginBottom: '16px', textTransform: 'uppercase' }}>Sejarah Kami</h4>
           <h1 style={{ fontFamily: 'Playfair Display, serif', color: '#361C14', fontSize: isMobile ? '32px' : '42px', fontWeight: '800', lineHeight: '1.2', marginBottom: '24px' }}>Cita Rasa Autentik dari Siak Sri Indrapura</h1>
           <p style={{ color: '#4A5568', fontSize: '15px', lineHeight: '1.8', marginBottom: '16px' }}>UD Putra Mandiri berdiri dengan dedikasi untuk melestarikan resep leluhur. Kami mengolah hasil bumi terbaik menjadi hidangan dodol berkualitas premium yang manis, legit, dan higienis.</p>
@@ -196,6 +308,7 @@ export function About() {
             <div><div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#681E1E', marginBottom: '8px' }}><Leaf size={24} /><h2 style={{ margin: 0, fontSize: '28px', fontWeight: '800' }}>100%</h2></div><span style={{ color: '#718096', fontSize: '13px', fontWeight: '600' }}>Bahan Alami</span></div>
           </div>
         </div>
+
       </div>
     </div>
   );
@@ -236,7 +349,7 @@ export function Contact() {
           <h3 style={{ fontSize: '20px', color: '#2D3748', fontWeight: '800', marginBottom: '32px' }}>Informasi Kontak</h3>
           <div style={{ display: 'flex', gap: '16px', marginBottom: '32px' }}><div style={{ background: '#FDF2F2', width: '48px', height: '48px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#681E1E', flexShrink: 0 }}><MapPin size={20} /></div><div><h5 style={{ margin: '0 0 4px', fontSize: '14px', color: '#2D3748', fontWeight: '800' }}>Pusat Produksi</h5><p style={{ margin: 0, fontSize: '13px', color: '#718096', lineHeight: '1.6' }}>Jl. Hang Tuah No. 12, Kampung Rempak, Siak</p></div></div>
           <div style={{ display: 'flex', gap: '16px', marginBottom: '40px' }}><div style={{ background: '#FDF2F2', width: '48px', height: '48px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#681E1E', flexShrink: 0 }}><Phone size={20} /></div><div><h5 style={{ margin: '0 0 4px', fontSize: '14px', color: '#2D3748', fontWeight: '800' }}>Telepon / WhatsApp</h5><p style={{ margin: 0, fontSize: '13px', color: '#718096', lineHeight: '1.6' }}>+62 812-3456-7890</p></div></div>
-          <button style={{ width: '100%', background: '#681E1E', color: '#fff', padding: '16px', borderRadius: '12px', border: 'none', fontWeight: '800', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}><i className="fa-brands fa-whatsapp" style={{ fontSize: '18px' }}></i> Chat Admin</button>
+          <button onClick={() => window.open('https://wa.me/6281234567890?text=Halo%20Admin%20UD%20Putra%20Mandiri,%20saya%20butuh%20bantuan/informasi...', '_blank')} style={{ width: '100%', background: '#681E1E', color: '#fff', padding: '16px', borderRadius: '12px', border: 'none', fontWeight: '800', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}><i className="fa-brands fa-whatsapp" style={{ fontSize: '18px' }}></i> Chat Admin</button>
         </div>
         <div style={{ background: '#fff', borderRadius: '24px', padding: isMobile ? '24px' : '40px', boxShadow: '0 10px 40px rgba(104,30,30,0.04)' }}>
           <h3 style={{ fontSize: '20px', color: '#2D3748', fontWeight: '800', marginBottom: '32px' }}>Kirim Pesan</h3>
@@ -260,6 +373,16 @@ export function Footer({ onNavigate }) {
   const { isMobile, isTablet } = useResponsive();
   const gridTemplate = isMobile ? '1fr' : (isTablet ? '1fr 1fr' : '1.5fr 1fr 1fr 1.2fr 1fr');
 
+  // 1. Tambahkan state settings
+  const [settings, setSettings] = useState({ site_title: 'UD Putra Mandiri', site_subtitle: 'Oleh-Oleh Khas Siak', site_logo: '' });
+
+  // 2. Tambahkan useEffect untuk fetch data dari Supabase
+  useEffect(() => {
+    supabase.from('settings').select('*').single().then(({ data }) => {
+      if (data) setSettings(data);
+    });
+  }, []);
+
   return (
     <footer style={{ background: '#361C14', color: '#FBF9F6', position: 'relative', overflow: 'hidden' }}>
       <div style={{ height: '4px', background: 'linear-gradient(90deg, #D4AF37, #F3E5AB, #D4AF37)' }}></div>
@@ -267,8 +390,21 @@ export function Footer({ onNavigate }) {
         <div style={{ display: 'grid', gridTemplateColumns: gridTemplate, gap: '40px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', borderRight: isMobile || isTablet ? 'none' : '1px solid rgba(212, 175, 55, 0.2)', paddingRight: isMobile || isTablet ? '0' : '20px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: '#D4AF37', color: '#361C14', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '20px', flexShrink: 0 }}>PM</div>
-              <div><h2 style={{ margin: 0, color: '#D4AF37', fontFamily: 'Playfair Display, serif', fontSize: '20px', fontWeight: '800' }}>SIMANIS</h2><span style={{ fontSize: '11px', color: 'rgba(251, 249, 246, 0.6)', letterSpacing: '0.5px' }}>UD Putra Mandiri</span></div>
+              
+              {/* 3. Render gambar dinamis, atau gunakan placeholder inisial jika logo kosong */}
+              {settings.site_logo ? (
+                <img src={settings.site_logo} alt="Logo" style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover', background: '#fff', padding: '2px', flexShrink: 0 }} />
+              ) : (
+                <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: '#D4AF37', color: '#361C14', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '20px', flexShrink: 0 }}>
+                  {settings.site_title ? settings.site_title.charAt(0) : 'P'}
+                </div>
+              )}
+              
+              <div>
+                <h2 style={{ margin: 0, color: '#D4AF37', fontFamily: 'Playfair Display, serif', fontSize: '20px', fontWeight: '800' }}>SIMANIS</h2>
+                {/* 4. Teks UD Putra Mandiri dibuat dinamis mengikuti pengaturan database */}
+                <span style={{ fontSize: '11px', color: 'rgba(251, 249, 246, 0.6)', letterSpacing: '0.5px' }}>{settings.site_title}</span>
+              </div>
             </div>
             <p style={{ margin: 0, color: 'rgba(251, 249, 246, 0.8)', fontSize: '13px', lineHeight: '1.6' }}>SIMANIS - Sistem Informasi Manajemen Dodol Khas Siak. Solusi digital untuk pengelolaan warisan kuliner Siak Sri Indrapura secara profesional dan terintegrasi.</p>
           </div>
@@ -306,7 +442,7 @@ export function Footer({ onNavigate }) {
         </div>
       </div>
       <div style={{ background: '#26130E', padding: '20px', textAlign: 'center' }}>
-        <span style={{ color: 'rgba(251, 249, 246, 0.5)', fontSize: '12px', letterSpacing: '0.5px' }}>&copy; {new Date().getFullYear()} Dinas Koperasi & UKM Kabupaten Siak. SIMANIS - UD Putra Mandiri. Hak Cipta Dilindungi Undang-Undang.</span>
+        <span style={{ color: 'rgba(251, 249, 246, 0.5)', fontSize: '12px', letterSpacing: '0.5px' }}>&copy; {new Date().getFullYear()} Dinas Koperasi & UKM Kabupaten Siak. SIMANIS - {settings.site_title}. Hak Cipta Dilindungi Undang-Undang.</span>
       </div>
     </footer>
   );
