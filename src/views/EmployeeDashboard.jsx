@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { DataModel } from '../models/dataModel';
-// PERBAIKAN: CheckCircle dan AlertCircle sudah dimasukkan ke import!
 import { Fingerprint, LogOut, PlusSquare, History, Activity, Plus, FileText, CheckCircle, AlertCircle, ShoppingBag } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
@@ -106,29 +105,31 @@ export default function EmployeeDashboard({ userId, activeTab }) {
           </div>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '20px', marginTop: '16px' }}>
-          <div>
-            <h4 style={{ margin: '0 0 4px', fontSize: '20px', fontWeight: '800', color: '#2D3748', fontFamily: 'Playfair Display, serif' }}>Peta Stok Gudang</h4>
-            <p style={{ margin: 0, fontSize: '13px', color: '#718096' }}>Pantau ketersediaan varian produk.</p>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#F8FAFC', border: '1px solid #EDF2F7', padding: '6px 14px', borderRadius: '20px', fontSize: '11px', fontWeight: '800', color: '#4A5568' }}>
-            <Activity size={14} color="#0D6EFD" /> LIVE
-          </div>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(3, 1fr)', gap: isMobile ? '16px' : '24px' }}>
-          {products.map(p => (
-            <div key={p.id} style={{ background: '#fff', borderRadius: '20px', padding: isMobile ? '16px' : '20px', border: '1px solid #EDF2F7', boxShadow: '0 4px 15px rgba(0,0,0,0.02)' }}>
-              <div style={{ background: '#F8FAFC', height: isMobile ? '100px' : '140px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', overflow: 'hidden' }}>
-                 {p.image_url ? <img src={p.image_url} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <ShoppingBag color="#CBD5E0" size={40} />}
-              </div>
-              <h3 style={{ margin: '0 0 12px', fontSize: isMobile ? '14px' : '16px', color: '#2D3748', fontWeight: '800', lineHeight: '1.4' }}>{p.name}</h3>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: '#718096', fontSize: '11px', fontWeight: '700' }}>STOK:</span>
-                <span style={{ color: p.stock_ready <= p.stock_minimum ? '#E53E3E' : '#059669', fontWeight: '800', fontSize: '14px' }}>{p.stock_ready}</span>
-              </div>
+        <div style={premiumCardStyle}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+            <div>
+              <h4 style={{ margin: '0 0 4px', fontSize: '18px', fontWeight: '800', color: '#2D3748' }}>Peta Stok Gudang Terkini</h4>
+              <p style={{ margin: 0, fontSize: '13px', color: '#718096' }}>Visualisasi ketersediaan produk agar sesuai target</p>
             </div>
-          ))}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#F8FAFC', border: '1px solid #EDF2F7', padding: '6px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: '700', color: '#4A5568' }}>
+              <Activity size={12} color="#0D6EFD" /> Live Data
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(3, 1fr)', gap: isMobile ? '16px' : '24px' }}>
+            {products.map(p => (
+              <div key={p.id} style={{ background: '#fff', borderRadius: '20px', padding: isMobile ? '16px' : '20px', border: '1px solid #EDF2F7', boxShadow: '0 4px 15px rgba(0,0,0,0.02)' }}>
+                <div style={{ background: '#F8FAFC', height: isMobile ? '100px' : '140px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', overflow: 'hidden' }}>
+                   {p.image_url ? <img src={p.image_url} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <ShoppingBag color="#CBD5E0" size={40} />}
+                </div>
+                <h3 style={{ margin: '0 0 12px', fontSize: isMobile ? '14px' : '16px', color: '#2D3748', fontWeight: '800', lineHeight: '1.4' }}>{p.name}</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#718096', fontSize: '11px', fontWeight: '700' }}>STOK:</span>
+                  <span style={{ color: p.stock_ready <= p.stock_minimum ? '#E53E3E' : '#059669', fontWeight: '800', fontSize: '14px' }}>{p.stock_ready}</span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
