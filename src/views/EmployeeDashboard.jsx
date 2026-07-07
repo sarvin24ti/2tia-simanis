@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DataModel } from '../models/dataModel';
 // PERBAIKAN: CheckCircle dan AlertCircle sudah dimasukkan ke import!
-import { Fingerprint, LogOut, PlusSquare, History, Activity, Plus, FileText, CheckCircle, AlertCircle } from 'lucide-react';
+import { Fingerprint, LogOut, PlusSquare, History, Activity, Plus, FileText, CheckCircle, AlertCircle, ShoppingBag } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 export default function EmployeeDashboard({ userId, activeTab }) {
