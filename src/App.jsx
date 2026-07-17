@@ -12,6 +12,7 @@ import ProfileEdit from './views/ProfileEdit';
 import KelolaStok from './views/KelolaStok';
 import DataPegawai from './views/DataPegawai';
 import Laporan from './views/Laporan';
+import { LoadingSpinner } from "./views/SharedComponents";
 import { PublicNavbar, Home, About, Contact, Footer } from './views/PublicPages';
 
 export default function App() {
@@ -49,7 +50,7 @@ export default function App() {
 
   useEffect(() => { if (controller.profile?.role === 'owner') loadUnreadNotif(); }, [controller.profile]);
 
-  if (controller.loading) return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FBF9F6', color: '#681E1E', fontWeight: '700' }}>Menyiapkan Sistem...</div>;
+  if (controller.loading) return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FBF9F6', color: '#681E1E', fontWeight: '700' }}><LoadingSpinner /></div>;
 
   if (!controller.profile) {
     if (guestView === 'login') {

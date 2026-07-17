@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { DataModel } from '../models/dataModel';
-import { Mail, MailOpen, Trash2, CheckCircle, ArrowUpDown } from 'lucide-react';
+import { Mail, MailOpen, Trash2, CheckCircle, ArrowUpDown, ChevronDown } from 'lucide-react';
+import { LoadingSpinner } from "./SharedComponents";
 
 export default function OwnerMessages({ onRefreshNotif }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortOrder, setSortOrder] = useState('desc');
+  const [showSortMenu, setShowSortMenu] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -49,56 +51,163 @@ export default function OwnerMessages({ onRefreshNotif }) {
   const unreadCount = messages.filter(m => !m.is_read).length;
 
   return (
-    <div style={{ maxWidth: '1200px', width: '100%' }}>
-      <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center', marginBottom: '24px', gap: '16px' }}>
+    <div style={{ padding: isMobile ? '20px 16px' : '40px', background: '#FBF9F6', minHeight: '100vh', maxWidth: '100vw', overflowX: 'hidden' }}>
+      
+      <style>{`
+        .premium-card {
+          background: #ffffff;
+          border-radius: 24px;
+          box-shadow: 0 10px 40px rgba(54, 28, 20, 0.03);
+          border: 1px solid rgba(237, 242, 247, 0.8);
+        }
+        .msg-row {
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          border-radius: 16px;
+          border-bottom: 1px solid #F1F5F9;
+        }
+        .msg-row:last-child { border-bottom: none; }
+        .msg-row:hover {
+          background-color: #ffffff;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+          transform: scale(1.005);
+          z-index: 10;
+          position: relative;
+        }
+        .action-btn { transition: all 0.2s; }
+        .action-btn.read:hover { background: #D1FAE5 !important; transform: scale(1.05); }
+        .action-btn.del:hover { background: #FEE2E2 !important; transform: scale(1.05); }
+        
+        .fade-in-up { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(20px); }
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+      `}</style>
+
+      {/* HEADER PAGE - PERBAIKAN Z-INDEX DI SINI */}
+      <div className="fade-in-up" style={{ position: 'relative', zIndex: 50, display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'flex-end', marginBottom: '32px', gap: '20px' }}>
+        <div>
+          <h1 style={{ fontFamily: 'Playfair Display, serif', color: '#361C14', fontSize: isMobile ? '28px' : '36px', fontWeight: '800', margin: '0 0 8px' }}>
+            Kotak Masuk
+          </h1>
+          <p style={{ color: '#718096', fontSize: '15px', margin: 0, fontWeight: '500' }}>
+            Anda memiliki <strong style={{ color: '#E53E3E' }}>{unreadCount} pesan baru</strong> yang belum dibaca.
+          </p>
+        </div>
+        
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', width: isMobile ? '100%' : 'auto', flexDirection: isMobile ? 'column' : 'row' }}>
-          <div style={{ width: isMobile ? '100%' : 'auto', background: '#fff', border: '1px solid #EDF2F7', borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
-            <ArrowUpDown size={16} color="#718096" />
-            <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} style={{ width: '100%', border: 'none', outline: 'none', background: 'transparent', fontWeight: '700', color: '#4A5568', cursor: 'pointer', fontSize: '13px' }}>
-              <option value="desc">Terbaru ke Terlama</option>
-              <option value="asc">Terlama ke Terbaru</option>
-            </select>
+          
+          <div style={{ position: 'relative', width: isMobile ? '100%' : 'auto' }}>
+            <button 
+              onClick={() => setShowSortMenu(!showSortMenu)}
+              style={{ width: '100%', background: '#fff', border: '1px solid #E2E8F0', borderRadius: '14px', padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', cursor: 'pointer', fontWeight: '700', color: '#4A5568', fontSize: '13px', transition: 'all 0.2s' }}
+              onMouseOver={e => e.currentTarget.style.borderColor = '#CBD5E0'}
+              onMouseOut={e => e.currentTarget.style.borderColor = '#E2E8F0'}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <ArrowUpDown size={16} color="#718096" />
+                {sortOrder === 'desc' ? 'Terbaru ke Terlama' : 'Terlama ke Terbaru'}
+              </div>
+              <ChevronDown size={16} />
+            </button>
+            
+            {showSortMenu && (
+              <div style={{ position: 'absolute', top: '110%', right: 0, width: '100%', minWidth: '180px', background: '#fff', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', border: '1px solid #E2E8F0', zIndex: 100, overflow: 'hidden' }}>
+                <div onClick={() => {setSortOrder('desc'); setShowSortMenu(false)}} style={{ padding: '12px 16px', fontSize: '13px', fontWeight: sortOrder === 'desc' ? '800' : '600', color: sortOrder === 'desc' ? '#681E1E' : '#4A5568', cursor: 'pointer', background: sortOrder === 'desc' ? '#FDF2F2' : 'transparent' }}>Terbaru ke Terlama</div>
+                <div onClick={() => {setSortOrder('asc'); setShowSortMenu(false)}} style={{ padding: '12px 16px', fontSize: '13px', fontWeight: sortOrder === 'asc' ? '800' : '600', color: sortOrder === 'asc' ? '#681E1E' : '#4A5568', cursor: 'pointer', background: sortOrder === 'asc' ? '#FDF2F2' : 'transparent' }}>Terlama ke Terbaru</div>
+              </div>
+            )}
           </div>
-          {unreadCount > 1 && (
-            <button onClick={handleMarkAllRead} style={{ width: isMobile ? '100%' : 'auto', background: '#ECFDF5', color: '#059669', border: '1px solid #A7F3D0', padding: '14px 20px', borderRadius: '12px', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '13px' }}>
+
+          {unreadCount > 0 && (
+            <button onClick={handleMarkAllRead} style={{ width: isMobile ? '100%' : 'auto', background: '#ECFDF5', color: '#059669', border: '1px solid #A7F3D0', padding: '14px 20px', borderRadius: '14px', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '13px', transition: 'all 0.2s' }} onMouseOver={e=>e.currentTarget.style.background='#D1FAE5'} onMouseOut={e=>e.currentTarget.style.background='#ECFDF5'}>
               <CheckCircle size={18} /> Tandai Semua Dibaca
             </button>
           )}
         </div>
       </div>
 
-      <div style={{ background: '#ffffff', borderRadius: '24px', padding: isMobile ? '20px' : '32px', boxShadow: '0 10px 40px rgba(0, 0, 0, 0.03)', border: '1px solid rgba(237, 242, 247, 0.8)', width: '100%', overflow: 'hidden' }}>
-        <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-          <table style={{ width: '100%', minWidth: '650px', textAlign: 'left', borderCollapse: 'collapse', fontSize: '13px' }}>
-            <thead>
-              <tr style={{ borderBottom: '2px solid #EDF2F7' }}>
-                <th style={{ padding: '16px 16px 16px 0', color: '#718096', fontWeight: '800', fontSize: '11px', whiteSpace: 'nowrap' }}>STATUS</th>
-                <th style={{ padding: '16px', color: '#718096', fontWeight: '800', fontSize: '11px', whiteSpace: 'nowrap' }}>PENGIRIM</th>
-                <th style={{ padding: '16px', color: '#718096', fontWeight: '800', fontSize: '11px', whiteSpace: 'nowrap' }}>SUBJEK & ISI PESAN</th>
-                <th style={{ padding: '16px 0 16px 16px', textAlign: 'right', color: '#718096', fontWeight: '800', fontSize: '11px', whiteSpace: 'nowrap' }}>AKSI</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedMessages.map(m => (
-                <tr key={m.id} style={{ borderBottom: '1px solid #F7FAFC', background: m.is_read ? 'transparent' : '#F8FAFC' }}>
-                  <td style={{ padding: '20px 16px 20px 0', width: '60px' }}>{m.is_read ? <MailOpen size={20} color="#A0AEC0" /> : <Mail size={20} color="#3B82F6" />}</td>
-                  <td style={{ padding: '20px 16px', fontWeight: m.is_read ? '600' : '800', color: '#2D3748', width: '160px', whiteSpace: 'nowrap' }}>{m.name || m.sender_name || m.pengirim || 'Tanpa Nama'}</td>
-                  <td style={{ padding: '20px 16px' }}>
-                    <div style={{ fontWeight: m.is_read ? '600' : '800', color: '#2D3748', marginBottom: '6px', fontSize: '14px' }}>{m.subject}</div>
-                    <div style={{ color: '#718096', fontSize: '13px', lineHeight: '1.5' }}>{m.content || m.message}</div>
-                  </td>
-                  <td style={{ padding: '20px 0 20px 16px', textAlign: 'right', width: '100px', whiteSpace: 'nowrap' }}>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                      {!m.is_read && <button onClick={() => handleRead(m.id)} style={{ background: '#ECFDF5', padding: '10px', borderRadius: '8px', border: 'none', cursor: 'pointer', color: '#059669' }}><CheckCircle size={16}/></button>}
-                      <button onClick={() => handleDelete(m.id)} style={{ background: '#FFF5F5', padding: '10px', borderRadius: '8px', border: 'none', cursor: 'pointer', color: '#E53E3E' }}><Trash2 size={16}/></button>
+      {/* CONTAINER PESAN */}
+      <div className="premium-card fade-in-up" style={{ padding: isMobile ? '16px' : '24px', animationDelay: '0.1s', position: 'relative', zIndex: 10 }}>
+        
+        {loading ? (
+          <LoadingSpinner />
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            
+            {!isMobile && (
+              <div style={{ display: 'grid', gridTemplateColumns: '50px 180px 1fr 100px', gap: '16px', padding: '0 16px 12px', borderBottom: '2px solid #F1F5F9', marginBottom: '8px' }}>
+                <span style={{ color: '#94A3B8', fontWeight: '800', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Status</span>
+                <span style={{ color: '#94A3B8', fontWeight: '800', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Pengirim</span>
+                <span style={{ color: '#94A3B8', fontWeight: '800', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Subjek & Isi Pesan</span>
+                <span style={{ color: '#94A3B8', fontWeight: '800', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'right' }}>Aksi</span>
+              </div>
+            )}
+
+            {sortedMessages.map(m => {
+              const dateObj = m.created_at ? new Date(m.created_at) : new Date();
+              const dateStr = dateObj.toLocaleDateString('id-ID', {day: 'numeric', month: 'short'});
+              const isUnread = !m.is_read;
+
+              return (
+                <div key={m.id} className="msg-row" style={{ 
+                  display: isMobile ? 'flex' : 'grid', 
+                  flexDirection: isMobile ? 'column' : 'row',
+                  gridTemplateColumns: '50px 180px 1fr 100px', 
+                  gap: isMobile ? '12px' : '16px', 
+                  padding: '16px', 
+                  alignItems: isMobile ? 'flex-start' : 'center',
+                  background: isUnread ? '#F8FAFC' : 'transparent'
+                }}>
+                  
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', width: isMobile ? '100%' : 'auto', justifyContent: isMobile ? 'space-between' : 'flex-start' }}>
+                    <div style={{ position: 'relative' }}>
+                      {isUnread ? <Mail size={22} color="#3B82F6" strokeWidth={2.5} /> : <MailOpen size={22} color="#CBD5E0" />}
+                      {isUnread && <div style={{ position: 'absolute', top: '-4px', right: '-4px', width: '10px', height: '10px', background: '#EF4444', borderRadius: '50%', border: '2px solid #F8FAFC' }} />}
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {messages.length === 0 && !loading && <div style={{ padding: '40px', textAlign: 'center', color: '#A0AEC0', fontWeight: '500' }}>Belum ada pesan masuk.</div>}
-        </div>
+                    {isMobile && <span style={{ color: '#94A3B8', fontSize: '12px', fontWeight: '600' }}>{dateStr}</span>}
+                  </div>
+
+                  <div style={{ fontWeight: isUnread ? '800' : '600', color: isUnread ? '#1E293B' : '#64748B', fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {m.name || m.sender_name || m.pengirim || 'Tanpa Nama'}
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', overflow: 'hidden', width: '100%' }}>
+                    <div style={{ fontWeight: isUnread ? '800' : '600', color: isUnread ? '#1E293B' : '#4A5568', fontSize: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {m.subject}
+                    </div>
+                    <div style={{ color: '#64748B', fontSize: '13px', lineHeight: '1.6', display: '-webkit-box', WebkitLineClamp: '2', WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      {m.content || m.message}
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: isMobile ? 'space-between' : 'flex-end', width: isMobile ? '100%' : 'auto', gap: '12px' }}>
+                    {!isMobile && <span style={{ color: '#94A3B8', fontSize: '12px', fontWeight: '600', marginRight: '8px' }}>{dateStr}</span>}
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      {isUnread && (
+                        <button className="action-btn read" onClick={() => handleRead(m.id)} title="Tandai dibaca" style={{ background: '#ECFDF5', padding: '10px', borderRadius: '10px', border: 'none', cursor: 'pointer', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <CheckCircle size={16}/>
+                        </button>
+                      )}
+                      <button className="action-btn del" onClick={() => handleDelete(m.id)} title="Hapus pesan" style={{ background: '#FFF5F5', padding: '10px', borderRadius: '10px', border: 'none', cursor: 'pointer', color: '#E53E3E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Trash2 size={16}/>
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+              );
+            })}
+            
+            {messages.length === 0 && !loading && (
+              <div style={{ padding: '60px', textAlign: 'center' }}>
+                <div style={{ background: '#F8FAFC', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                  <MailOpen size={32} color="#CBD5E0" />
+                </div>
+                <h3 style={{ margin: '0 0 8px', color: '#1E293B', fontWeight: '800' }}>Inbox Kosong</h3>
+                <p style={{ margin: 0, color: '#94A3B8', fontSize: '14px' }}>Belum ada pesan dari pengunjung website.</p>
+              </div>
+            )}
+
+          </div>
+        )}
       </div>
     </div>
   );
